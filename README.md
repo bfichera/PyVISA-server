@@ -2,8 +2,8 @@
 
 A collection of instrumentation utilities using pyvisa
 
-# Dependencies
+### Dependencies
 
-    - pyvisa
-    - appdirs
-    - a pyvisa backend (pyvisa-py, ni-visa, etc.)
+* `pyvisa`
+* `appdirs`
+* a `pyvisa` backend (`pyvisa-py`, `ni-visa`, etc.)
