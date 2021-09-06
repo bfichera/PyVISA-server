@@ -1,13 +1,13 @@
 import pyvisa
-from instruments.instrument import open_instrument
-from instruments.bk_1686B import bk_1686B
+from instruments.bk_1686B.instrument import bk_1686B, resource_kwargs
+
+print(bk_1686B)
 
 rm = pyvisa.ResourceManager()
-bk = open_instrument(
+bk = rm.open_resource(
     'ASRL/dev/ttyUSB0::INSTR',
-    rm,
-    bk_1686B,
-    write_termination='\r',
-    read_termination='\r',
+    resource_pyclass=bk_1686B,
 )
-print(bk.query('GETS'))
+bk.configure()
+bk.write('GETS')
+print(bk.read())
