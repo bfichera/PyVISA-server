@@ -1,6 +1,5 @@
 import pyvisa
 from instruments.bk_1686B import bk_1686B
-from pathlib import Path
 
 rm = pyvisa.ResourceManager()
 bk = rm.open_resource(

@@ -16,31 +16,83 @@ cfg = {
 """
 
 _default_unprotected_config = r"""{
+    "lock":false,
     "resource_kwargs":{
     }
 }
 """
 
+def instrument(resource_kwargs, instrument_name):
 
-def instrument(resource_kwargs):
-    """Adds a parameterless configure() method which sets resource attributes
-    defined by resource_kwargs.
-
-    Parameters
-    ----------
-    resource_kwargs : dict
-    """
+    conf_unprotected_filename = _get_unprotected_config_path(instrument_name)
+    _open = open
 
     def decorator(cls):
 
-        def configure(self):
-            for k,v in resource_kwargs.items():
-                setattr(self, k, v)
+        class newcls(cls):
 
-        cls.configure = configure
-        return cls
+            def configure(self):
+                for k,v in resource_kwargs.items():
+                    setattr(self, k, v)
+
+            @property
+            def lock(self):
+                return self._get_cfg_attr('lock')
+
+            @lock.setter
+            def lock(self, value):
+                self._set_cfg_attr('lock', value)
+
+            def open(self, *args, **kwargs):
+                if self.lock is True:
+                    raise ValueError('Instrument %s locked.' % instrument_name)
+                else:
+                    self.lock = True
+                return cls.open(self, *args, **kwargs)
+
+            def close(self, *args, **kwargs):
+                self.lock = False
+                return cls.close(self, *args, **kwargs)
+
+            def _get_cfg_attr(self, name):
+                with _open(conf_unprotected_filename, 'r') as fh:
+                    cfg = json.load(fh)
+                return cfg[name]
+
+            def _set_cfg_attr(self, name, value):
+                with _open(conf_unprotected_filename, 'r') as fh:
+                    cfg = json.load(fh)
+                if name in cfg.keys():
+                    cfg[name] = value
+                else:
+                    raise ValueError(
+                        'Can\'t create new attribute automatically; set a'
+                        'default value in the relevant config file',
+                    )
+                with _open(conf_unprotected_filename, 'w') as fh:
+                    json.dump(cfg, fh)
+                
+#             cls.configure = configure
+#             cls.lock = lock
+#             cls.open = open
+#             cls.close = close
+#             cls._get_cfg_attr = _get_cfg_attr
+#             cls._set_cfg_attr = _set_cfg_attr
+        return newcls
 
     return decorator
+
+
+def _get_protected_config_path(instrument_name):
+    return Path(
+        user_config_dir('instruments'),
+    ) / instrument_name / 'conf-protected.py'
+
+
+def _get_unprotected_config_path(instrument_name):
+    return Path(
+        user_config_dir('instruments'),
+    ) / instrument_name / 'conf.json'
 
 
 def get_instrument_cfg(instrument_name):
@@ -56,12 +108,8 @@ def get_instrument_cfg(instrument_name):
     cfg : dict
     """
 
-    protected_config_path = Path(
-        user_config_dir('instruments'),
-    ) / 'bk_1686B' / 'conf-protected.py'
-    unprotected_config_path = Path(
-        user_config_dir('instruments'),
-    ) / 'bk_1686B' / 'conf.json'
+    protected_config_path = _get_protected_config_path(instrument_name)
+    unprotected_config_path = _get_unprotected_config_path(instrument_name)
 
     for i, fp in enumerate((protected_config_path, unprotected_config_path)):
         if not fp.exists():
