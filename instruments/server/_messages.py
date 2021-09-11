@@ -27,6 +27,14 @@ class GetAttrMessage(Message):
         Message.__init__(self)
 
 
+class GetAttrCallableMessage(Message):
+
+    def __init__(self, instrument_name, name):
+        self.instrument_name = instrument_name
+        self.name = name
+        Message.__init__(self)
+
+
 class RunMethodMessage(Message):
 
     def __init__(self, instrument_name, name, *args, **kwargs):

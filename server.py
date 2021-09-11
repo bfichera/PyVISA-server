@@ -1,47 +1,72 @@
 import socket
-import pickle
-import sys
+import argparse
+import threading
 
-import pyvisa
-
-from info import A, Message
-from instruments.bk_1686B import bk_1686B
+from instruments.server.instrumentmanager import _MessageHandler
+from instruments.server import _messages
 
 
-HOST = '127.0.0.1'
-PORT = int(sys.argv[1])
+def _getcfg():
+    parser = argparse.ArgumentParser(description='Start instruments server')
+    parser.add_argument(
+        'address',
+        default='127.0.0.1',
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        default=2264,
+    )
+    args = parser.parse_args()
+    return vars(args)
 
-mya = A(3)
-myb = A(10)
 
-instruments = {'a':mya, 'b':myb}
+class ClientThread(threading.Thread):
+    
+    def __init__(self, sock, address, message_handler):
+        threading.Thread.__init__(self)
+        self.sock = sock
+        self.address = address
+        self.message_handler = message_handler
+        print('Connected to %s' % str(self.address))
 
-known_resource_pyclasses = {'bk_1686B':bk_1686B}
-
-rm = pyvisa.ResourceManager()
-
-with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-    s.bind((HOST, PORT))
-    s.listen()
-    conn, addr = s.accept()
-    with conn:
-        print('Connected by', addr)
+    def run(self):
         while True:
-            data = conn.recv(1024)
+            data = self.sock.recv(1024)
             if not data:
                 break
-            message = pickle.loads(data)
-            if message.instrument_name not in instruments.keys():
-                instruments[message.instrument_name] = rm.open_resource(
-                    message.name,
-                    resource_pyclass=known_resource_pyclasses[
-                        message.instrument_name,
-                    ],
+            message = _messages.decode(data)
+            if isinstance(message, _messages.RequestReturnMessage):
+                return_message = self.message_handler._search_returned_messages(
+                    message.message,
                 )
-            out = pickle.dumps(
-                getattr(
-                    instruments[message.instrument_name],
-                    message.name,
-                ),
-            )
-            conn.sendall(out)
+                self.sock.sendall(return_message.encode())
+            else:
+                self.message_handler._process_message(message)
+                self.sock.sendall(_messages.EmptyMessage().encode())
+
+
+def main(cfg):
+
+    host = cfg['address']
+    port = cfg['port']
+
+    message_handler = _MessageHandler()
+
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock.bind((host, port))
+    while True:
+        sock.listen()
+        clientsock, clientaddress = sock.accept()
+        newthread = ClientThread(
+            clientsock,
+            clientaddress,
+            message_handler,
+        )
+        newthread.start()
+
+
+if __name__ == '__main__':
+    
+    cfg = _getcfg()
+    main(cfg)

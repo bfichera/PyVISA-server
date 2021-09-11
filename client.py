@@ -1,12 +1,20 @@
 import socket
 import sys
-from info import ServerA
 
+from instruments.server.instrumentmanager import RemoteInstrument
 
 HOST = '127.0.0.1'
 PORT = int(sys.argv[1])
+sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+sock.connect((HOST, PORT))
 
-s = socket.socket(socket.AF_INET, socket.SOCK_STREAM) 
-s.connect((HOST, PORT))
-servera = ServerA(s, 'b')
-print(servera.tell(9))
+bk_1686B = RemoteInstrument('bk_1686B', sock, 'ASRL/dev/ttyUSB0::INSTR')
+bk_1686B.init()
+
+while True:
+    try:
+        print(bk_1686B.query('GETS'))
+    except KeyboardInterrupt:
+        break
+
+sock.close()
