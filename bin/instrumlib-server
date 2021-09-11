@@ -1,0 +1,25 @@
+#!/usr/bin/python
+import argparse
+
+from instrumlib_server.server._startserver import main
+
+
+def _getcfg():
+    parser = argparse.ArgumentParser(description='Start instrumlib server')
+    parser.add_argument(
+        'address',
+        default='127.0.0.1',
+    )
+    parser.add_argument(
+        '--port',
+        type=int,
+        default=2264,
+    )
+    args = parser.parse_args()
+    return vars(args)
+
+
+if __name__ == '__main__':
+    
+    cfg = _getcfg()
+    main(cfg)

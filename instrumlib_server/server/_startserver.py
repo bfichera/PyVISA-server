@@ -1,24 +1,8 @@
-import socket
-import argparse
 import threading
+import socket
 
-from instrumlib.server.instrumentmanager import _MessageHandler
-from instrumlib.server import _messages
-
-
-def _getcfg():
-    parser = argparse.ArgumentParser(description='Start instrumlib server')
-    parser.add_argument(
-        'address',
-        default='127.0.0.1',
-    )
-    parser.add_argument(
-        '--port',
-        type=int,
-        default=2264,
-    )
-    args = parser.parse_args()
-    return vars(args)
+from .instrumentmanager import _MessageHandler
+from . import _messages
 
 
 class ClientThread(threading.Thread):
@@ -66,7 +50,3 @@ def main(cfg):
         newthread.start()
 
 
-if __name__ == '__main__':
-    
-    cfg = _getcfg()
-    main(cfg)

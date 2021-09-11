@@ -1,7 +1,9 @@
+#!/usr/bin/python
 import socket
 import sys
 
-from instrumlib.server.instrumentmanager import RemoteInstrument
+from instrumlib_server import RemoteInstrument
+
 
 HOST = '127.0.0.1'
 PORT = int(sys.argv[1])
