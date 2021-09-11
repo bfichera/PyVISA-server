@@ -22,6 +22,7 @@ _default_unprotected_config = r"""{
 }
 """
 
+
 def instrument(resource_kwargs, instrument_name):
 
     conf_unprotected_filename = _get_unprotected_config_path(instrument_name)

@@ -1,25 +1,27 @@
 import socket
 import argparse
+import random
 
+import pyvisa
 import dill as pickle
 
 from instruments.server.instrumentmanager import MessageHandler
-from instruments.server import messages
 
 
 def _getcfg():
     parser = argparse.ArgumentParser(description='Start instruments server')
     parser.add_argument(
         'address',
+        dest='address',
         default='127.0.0.1',
     )
     parser.add_argument(
-        '--port',
-        type=int,
+        'port',
+        dest='port',
         default=2264,
     )
-    args = parser.parse_args()
-    return vars(args)
+    args = parser.parse_args
+    return args.valuesdict()
 
 
 def main(cfg):
@@ -40,12 +42,14 @@ def main(cfg):
             if not data:
                 break
             message = pickle.loads(data)
-            if isinstance(message, messages.RequestReturnMessage):
-                return_message = message_handler.search_returned_messages(message.message)
-                conn.sendall(pickle.dumps(return_message))
+            if message == 'RETURN':
+                conn.sendall(
+                    pickle.dumps(
+                        message_handler.pop(),
+                    ),
+                )
             else:
                 message_handler.process_message(message)
-                conn.sendall(pickle.dumps(messages.EmptyMessage()))
 
 
 if __name__ == '__main__':

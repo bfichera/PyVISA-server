@@ -27,3 +27,6 @@ class bk_1686B(_Subclass):
 
     def init(self):
         self.configure()
+
+    def do_thing(self):
+        return self.query('GETS')
