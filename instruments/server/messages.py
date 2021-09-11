@@ -1,4 +1,9 @@
 import random
+import dill as pickle
+
+
+def decode(bytes):
+    return pickle.loads(bytes)
 
 
 class Message:
@@ -6,6 +11,9 @@ class Message:
     def __init__(self):
         # TODO
         self.id = random.randint(0, 2**128)
+
+    def encode(self):
+        return pickle.dumps(self)
 
     def __eq__(self, other):
         return self.id == other.id

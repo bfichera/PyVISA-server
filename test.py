@@ -1,7 +1,6 @@
 import socket
 import argparse
-
-import dill as pickle
+import threading
 
 from instruments.server.instrumentmanager import MessageHandler
 from instruments.server import messages
@@ -22,6 +21,31 @@ def _getcfg():
     return vars(args)
 
 
+class ClientThread(threading.Thread):
+    
+    def __init__(self, sock, address, message_handler):
+        threading.Thread.__init__(self)
+        self.sock = sock
+        self.address = address
+        self.message_handler = message_handler
+        print('Connected to %s' % self.address)
+
+    def run(self):
+        while True:
+            data = self.sock.recv(1024)
+            if not data:
+                break
+            message = messages.decode(data)
+            if isinstance(message, messages.RequestReturnMessage):
+                return_message = self.message_handler.search_returned_message(
+                    message.message,
+                )
+                self.sock.sendall(return_message.encode())
+            else:
+                self.message_handler.process_message(message)
+                self.sock.sendall(messages.EmptyMessage().encode())
+
+
 def main(cfg):
 
     host = cfg['address']
@@ -31,21 +55,15 @@ def main(cfg):
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((host, port))
-    sock.listen()
-    conn, addr = sock.accept()
-    with conn:
-        print('Connected by', addr)
-        while True:
-            data = conn.recv(1024)
-            if not data:
-                break
-            message = pickle.loads(data)
-            if isinstance(message, messages.RequestReturnMessage):
-                return_message = message_handler.search_returned_messages(message.message)
-                conn.sendall(pickle.dumps(return_message))
-            else:
-                message_handler.process_message(message)
-                conn.sendall(pickle.dumps(messages.EmptyMessage()))
+    while True:
+        sock.listen()
+        clientsock, clientaddress = sock.accept()
+        newthread = ClientThread(
+            clientsock,
+            clientaddress,
+            message_handler,
+        )
+        newthread.start()
 
 
 if __name__ == '__main__':
