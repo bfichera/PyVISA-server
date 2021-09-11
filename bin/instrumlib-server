@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import argparse
 
-from instrumlib_server.server._startserver import main
+from instrumlib_server._startserver import main
 
 
 def _getcfg():

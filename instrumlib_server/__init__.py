@@ -1,1 +1,1 @@
-from .server.instrumentmanager import RemoteInstrument
+from .instrumentmanager import RemoteInstrument
