@@ -86,13 +86,13 @@ def instrument(resource_kwargs, instrument_name):
 
 def _get_protected_config_path(instrument_name):
     return Path(
-        user_config_dir('instruments'),
+        user_config_dir('instrumlib'),
     ) / instrument_name / 'conf-protected.py'
 
 
 def _get_unprotected_config_path(instrument_name):
     return Path(
-        user_config_dir('instruments'),
+        user_config_dir('instrumlib'),
     ) / instrument_name / 'conf.json'
 
 

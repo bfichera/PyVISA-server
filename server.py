@@ -2,12 +2,12 @@ import socket
 import argparse
 import threading
 
-from instruments.server.instrumentmanager import _MessageHandler
-from instruments.server import _messages
+from instrumlib.server.instrumentmanager import _MessageHandler
+from instrumlib.server import _messages
 
 
 def _getcfg():
-    parser = argparse.ArgumentParser(description='Start instruments server')
+    parser = argparse.ArgumentParser(description='Start instrumlib server')
     parser.add_argument(
         'address',
         default='127.0.0.1',

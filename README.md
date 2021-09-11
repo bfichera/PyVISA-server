@@ -1,4 +1,4 @@
-# instruments
+# InstrumLib
 
 A collection of instrumentation utilities using pyvisa
 
