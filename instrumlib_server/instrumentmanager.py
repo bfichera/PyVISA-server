@@ -4,7 +4,7 @@ import threading
 
 import pyvisa
 
-from ..knownclasses import knownclasses
+from .._knownclasses import known_classes
 from . import _messages
 from ._utilities import (
     _check_output,
@@ -102,7 +102,7 @@ class _InstrumentsManager:
         **kwargs,
     ):
 
-        if instrument_name not in knownclasses.keys():
+        if instrument_name not in known_classes.keys():
             _logger.warning(f'Warning: pyclass {resource_pyclass} unknown.')
         setattr(
             self,
@@ -139,7 +139,7 @@ class _MessageHandler:
                     self.instruments_manager._attach_resource(
                         message.resource_name,
                         message.instrument_name,
-                        resource_pyclass=knownclasses[message.instrument_name],
+                        resource_pyclass=known_classes[message.instrument_name],
                     )
                 else:
                     _logger.debug(
