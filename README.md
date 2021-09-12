@@ -1,4 +1,4 @@
-# InstrumLib Server
+# PyVISA-server
 
 A local server designed to manage communication from multiple clients with multiple different VISA instruments
 
