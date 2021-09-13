@@ -27,7 +27,7 @@ setuptools.setup(
     ],
     python_requires='>=3.9',
     entry_points={
-        'console_scripts':['pyvisa-server=pyvisaserver.command_line.main'],
+        'console_scripts':['pyvisa-server=pyvisaserver.command_line:main'],
     },
     install_requires=[
         'appdirs',
