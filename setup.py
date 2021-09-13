@@ -26,7 +26,9 @@ setuptools.setup(
         'Operating System :: Unix',
     ],
     python_requires='>=3.9',
-    scripts=['bin/pyvisa-server'],
+    entry_points={
+        'console_scripts':['pyvisa-server=pyvisaserver.command_line.main'],
+    },
     install_requires=[
         'appdirs',
         'dill',

@@ -1,11 +1,9 @@
-#!/usr/bin/python
 import argparse
 from pathlib import Path
 
 from appdirs import user_config_dir
 
-from pyvisaserver._startserver import main
-from pyvisaserver._knownclasses import _get_knownclasses
+from pyvisaserver._startserver import main as startserver_main
 
 
 def _getcfg():
@@ -34,7 +32,7 @@ def _getcfg():
     return vars(args)
 
 
-if __name__ == '__main__':
-    
+def main():
+
     cfg = _getcfg()
-    main(cfg)
+    startserver_main(cfg)
