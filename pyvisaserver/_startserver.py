@@ -1,6 +1,7 @@
 import threading
 import socket
 
+from ._knownclasses import _get_knownclasses
 from .instrumentmanager import _MessageHandler
 from . import _messages
 
@@ -34,8 +35,11 @@ def main(cfg):
 
     host = cfg['address']
     port = cfg['port']
+    known_classes = _get_knownclasses(
+        cfg['known_classes_path'],
+    )
 
-    message_handler = _MessageHandler()
+    message_handler = _MessageHandler(known_classes)
 
     sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     sock.bind((host, port))

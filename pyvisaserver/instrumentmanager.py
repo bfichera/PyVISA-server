@@ -4,7 +4,6 @@ import threading
 
 import pyvisa
 
-from .._knownclasses import known_classes
 from . import _messages
 from ._utilities import (
     _check_output,
@@ -121,10 +120,11 @@ class _InstrumentsManager:
 
 class _MessageHandler:
 
-    def __init__(self):
+    def __init__(self, known_classes):
         # TODO
         self.instruments_manager = _InstrumentsManager(None, self)
         self.returned__messages = []
+        self.known_classes = known_classes
 
     def _add_return_result(self, message):
         if isinstance(message, _messages.ReturnAttrMessage):
