@@ -21,7 +21,7 @@ setuptools.setup(
     url='https://github.com/bfichera/PyVISA-server',
     packages=setuptools.find_packages(),
     classifiers=[
-`       'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3',
         'Licence :: OSI Approved :: MIT License',
         'Operating System :: Unix',
     ],
