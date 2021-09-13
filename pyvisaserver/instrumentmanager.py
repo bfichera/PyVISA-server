@@ -14,6 +14,33 @@ _logger = logging.getLogger(__name__)
 
 
 class RemoteInstrument:
+    """Client-side interface with instrumentation server.
+
+    Parameters
+    ----------
+    instrument_name : str
+        The name of the instrument, must be a member of
+        ``known_classes.keys()``.
+
+    sock : socket.socket
+        AF_INET family client-side ``socket.socket`` object.
+
+    resource_name : str, optional
+        Resource name to be passed to ``pyvisa.ResourceManager.open_resource``.
+        If ``None``, do not initialize a new instrument. Raises an error if
+        no available resource exists with the name ``instrument_name``. Default
+        is ``None``.
+
+    Notes
+    -----
+    A ``Remote Instrument`` is simply a wrapper around a
+    ``pyvisa.resource_pyclass`` object which, instead of running methods like
+    ``pyvisa.resource_pyclass.write()``, ``pyvisa.resource_pyclass.read()``,
+    etc. directly, it communicates via ``sock`` to run those methods on a
+    single ``pyvisa.resource_pyclass`` object which exists on an available
+    PyVISA server.
+
+    """
 
     def __init__(self, instrument_name, sock, resource_name=None):
         self.sock = sock
@@ -101,7 +128,7 @@ class _InstrumentsManager:
         **kwargs,
     ):
 
-        if instrument_name not in known_classes.keys():
+        if instrument_name not in self.message_handler.known_classes.keys():
             _logger.warning(f'Warning: pyclass {resource_pyclass} unknown.')
         setattr(
             self,
@@ -139,7 +166,7 @@ class _MessageHandler:
                     self.instruments_manager._attach_resource(
                         message.resource_name,
                         message.instrument_name,
-                        resource_pyclass=known_classes[message.instrument_name],
+                        resource_pyclass=self.known_classes[message.instrument_name],
                     )
                 else:
                     _logger.debug(
